@@ -1,6 +1,9 @@
 using System;
 using System.Windows.Forms;
 using System.ComponentModel;
+using System.IO;
+using System.Net;
+using System.Collections.Generic;
 
 namespace ProxyChecker {
 	public class ProxyCheckerForm : Form {
@@ -9,6 +12,8 @@ namespace ProxyChecker {
 
 		public ProxyCheckerForm() {
 			proxyFileDialog = new OpenFileDialog();
+			proxyFileDialog.Title = "Select proxy list";
+			proxyFileDialog.DefaultExt = "txt";
 			proxyFileDialog.FileOk += proxyFileDialog_FileOk;
 
 			openProxyFileDialog = new Button();
@@ -24,7 +29,13 @@ namespace ProxyChecker {
 		}
 
 		private void proxyFileDialog_FileOk(object sender, CancelEventArgs e) {
-			Console.WriteLine("Proxy list(s) selected");
+			Console.WriteLine("Proxy list selected");
+
+			Stream filestream = proxyFileDialog.OpenFile();
+
+			using (StreamReader reader = new StreamReader(filestream)) {
+				List<WebProxy> proxies = ProxyListParser.Parse(reader.ReadToEnd());
+			}
 		}
 	}
 }
