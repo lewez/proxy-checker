@@ -17,7 +17,7 @@ namespace ProxyChecker {
 				try {
 					webproxies.Add(new WebProxy(formattedProxy));
 				}
-				catch (UriFormatException e) {
+				catch (UriFormatException) {
 					Console.WriteLine("Badly foramtted proxy: " + formattedProxy);
 				}
 			}

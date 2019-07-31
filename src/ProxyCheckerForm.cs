@@ -4,11 +4,13 @@ using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ProxyChecker {
 	public class ProxyCheckerForm : Form {
 		private OpenFileDialog proxyFileDialog;
 		private Button openProxyFileDialog;
+		private ProgressBar proxyFileProgress;
 
 		public ProxyCheckerForm() {
 			proxyFileDialog = new OpenFileDialog();
@@ -20,8 +22,12 @@ namespace ProxyChecker {
 			openProxyFileDialog.Text = "Open proxy list";
 			openProxyFileDialog.AutoSize = true;
 			openProxyFileDialog.Click += openProxyFileDialog_Click;
+
+			proxyFileProgress = new ProgressBar();
+			proxyFileProgress.Left = 120;
 			
 			Controls.Add(openProxyFileDialog);
+			Controls.Add(proxyFileProgress);
 		}
 
 		private void openProxyFileDialog_Click(object sender, EventArgs e) {
@@ -35,6 +41,8 @@ namespace ProxyChecker {
 
 			using (StreamReader reader = new StreamReader(filestream)) {
 				List<WebProxy> proxies = ProxyListParser.Parse(reader.ReadToEnd());
+
+				ProxyChecker.CheckProxies(proxies);
 			}
 		}
 	}
