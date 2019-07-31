@@ -8,18 +8,37 @@ using System.Net.Http;
 
 namespace ProxyChecker {
 	public class ProxyChecker {
+		private const int ChunkSize = 25;
+
 		public static void Main() {
 			Application.Run(new ProxyCheckerForm());
 		}
 
-		public static async Task CheckProxies(List<WebProxy> proxies) {
-			List<Task<ProxyCheckResult>> tasks = new List<Task<ProxyCheckResult>>();
+		public static async Task CheckProxies(List<WebProxy> proxies, IProgress<ProxyCheckProgressReport> progress) {
+			int numTotal = proxies.Count;
+			int numChecked = 0;
+			int chunkSize = Math.Min(ChunkSize, proxies.Count);
 
-			foreach (WebProxy proxy in proxies) {
-				tasks.Add(Task.Run(() => CheckProxy(proxy)));
+			foreach (List<WebProxy> splitProxies in ListExtensions.ChunkBy(proxies, chunkSize)) {
+				List<Task<ProxyCheckResult>> tasks = new List<Task<ProxyCheckResult>>();
+
+				foreach (WebProxy proxy in splitProxies) {
+					tasks.Add(Task.Run(() => {
+						Task<ProxyCheckResult> result = CheckProxy(proxy);
+
+						progress.Report(new ProxyCheckProgressReport() {
+							NumTotal = numTotal,
+							NumChecked = ++numChecked
+						});
+
+						return result;
+					}));
+				}
+
+				await Task.WhenAll(tasks);
 			}
 
-			ProxyCheckResult[] results = await Task.WhenAll(tasks);
+			Console.WriteLine("All tasks complete");
 		}
 
 		public static async Task<ProxyCheckResult> CheckProxy(WebProxy proxy) {
@@ -30,22 +49,31 @@ namespace ProxyChecker {
 			HttpClient client = new HttpClient(clienthandler) {
 				Timeout = new TimeSpan(0, 0, 10)
 			};
-			Console.WriteLine("yeet");
+
+			ProxyCheckResult result = ProxyCheckResult.UNKNOWN;
 
 			try {
-				HttpResponseMessage resp = await client.GetAsync("http://google.co.uk");
+				HttpResponseMessage resp = await client.GetAsync("http://google.com");
 
-				Console.WriteLine("resp: " + resp.StatusCode);
+				switch (resp.StatusCode) {
+					case HttpStatusCode.OK:
+						result = ProxyCheckResult.OK;
+						break;
+					default:
+						result = ProxyCheckResult.UNKNOWN;
+						break;
+				}
 			}
 			catch (Exception ex) {
 				if (ex is TaskCanceledException || ex is HttpRequestException) {
-					return ProxyCheckResult.TIMED_OUT;
+					result = ProxyCheckResult.TIMED_OUT;
 				}
 			}
 
-			// TODO: Report progress
+			clienthandler.Dispose();
+			client.Dispose();
 
-			return ProxyCheckResult.UNKNOWN;
+			return result;
 		}
 	}
 }

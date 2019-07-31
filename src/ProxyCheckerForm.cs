@@ -34,7 +34,11 @@ namespace ProxyChecker {
 			proxyFileDialog.ShowDialog();
 		}
 
-		private void proxyFileDialog_FileOk(object sender, CancelEventArgs e) {
+		private void proxyFileProgress_ProgressChanged(object sender, ProxyCheckProgressReport progreport) {
+			proxyFileProgress.Value = (progreport.NumChecked * 100) / progreport.NumTotal;
+		}
+
+		private async void proxyFileDialog_FileOk(object sender, CancelEventArgs e) {
 			Console.WriteLine("Proxy list selected");
 
 			Stream filestream = proxyFileDialog.OpenFile();
@@ -42,7 +46,10 @@ namespace ProxyChecker {
 			using (StreamReader reader = new StreamReader(filestream)) {
 				List<WebProxy> proxies = ProxyListParser.Parse(reader.ReadToEnd());
 
-				ProxyChecker.CheckProxies(proxies);
+				Progress<ProxyCheckProgressReport> progress = new Progress<ProxyCheckProgressReport>();
+				progress.ProgressChanged += proxyFileProgress_ProgressChanged;
+
+				await ProxyChecker.CheckProxies(proxies, progress);
 			}
 		}
 	}
