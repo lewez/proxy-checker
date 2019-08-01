@@ -8,10 +8,12 @@ using System.Net.Http;
 
 namespace ProxyChecker {
 	public class ProxyChecker {
+		private ProxyCheckerForm form;
 		private const int ChunkSize = 25;
 
 		public static void Main() {
-			Application.Run(new ProxyCheckerForm());
+			form = new ProxyCheckerForm();
+			Application.Run(form);
 		}
 
 		public static async Task CheckProxies(List<WebProxy> proxies, IProgress<ProxyCheckProgressReport> progress) {
@@ -28,7 +30,9 @@ namespace ProxyChecker {
 
 						progress.Report(new ProxyCheckProgressReport() {
 							NumTotal = numTotal,
-							NumChecked = ++numChecked
+							NumChecked = ++numChecked,
+							ProxyChecked = proxy,
+							ProxyCheckResult = result.Result
 						});
 
 						return result;
