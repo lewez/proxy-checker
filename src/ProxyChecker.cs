@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
 
 namespace ProxyChecker {
 	public class ProxyChecker {
@@ -14,12 +15,16 @@ namespace ProxyChecker {
 			Application.Run(new ProxyCheckerForm());
 		}
 
-		public static async Task CheckProxiesAsync(List<WebProxy> proxies, string website, int timeoutSecs, IProgress<ProxyCheckProgressReport> progress) {
+		public static async Task CheckProxiesAsync(List<WebProxy> proxies, string website, int timeoutSecs, IProgress<ProxyCheckProgressReport> progress, CancellationToken cancellationToken) {
 			int numTotal = proxies.Count;
 			int numChecked = 0;
 			int chunkSize = Math.Min(ChunkSize, proxies.Count);
 
 			foreach (List<WebProxy> splitProxies in ListExtensions.ChunkBy(proxies, chunkSize)) {
+				if (cancellationToken.IsCancellationRequested) {
+					break;
+				}
+
 				List<Task<ProxyCheckResult>> tasks = new List<Task<ProxyCheckResult>>();
 
 				foreach (WebProxy proxy in splitProxies) {
