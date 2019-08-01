@@ -8,15 +8,13 @@ using System.Net.Http;
 
 namespace ProxyChecker {
 	public class ProxyChecker {
-		private ProxyCheckerForm form;
 		private const int ChunkSize = 25;
 
 		public static void Main() {
-			form = new ProxyCheckerForm();
-			Application.Run(form);
+			Application.Run(new ProxyCheckerForm());
 		}
 
-		public static async Task CheckProxies(List<WebProxy> proxies, IProgress<ProxyCheckProgressReport> progress) {
+		public static async Task CheckProxies(List<WebProxy> proxies, string website, int timeoutSecs, IProgress<ProxyCheckProgressReport> progress) {
 			int numTotal = proxies.Count;
 			int numChecked = 0;
 			int chunkSize = Math.Min(ChunkSize, proxies.Count);
@@ -26,7 +24,7 @@ namespace ProxyChecker {
 
 				foreach (WebProxy proxy in splitProxies) {
 					tasks.Add(Task.Run(() => {
-						Task<ProxyCheckResult> result = CheckProxy(proxy);
+						Task<ProxyCheckResult> result = CheckProxy(proxy, website, timeoutSecs);
 
 						progress.Report(new ProxyCheckProgressReport() {
 							NumTotal = numTotal,
@@ -45,19 +43,19 @@ namespace ProxyChecker {
 			Console.WriteLine("All tasks complete");
 		}
 
-		public static async Task<ProxyCheckResult> CheckProxy(WebProxy proxy) {
+		public static async Task<ProxyCheckResult> CheckProxy(WebProxy proxy, string website, int timeoutSecs) {
 			HttpClientHandler clienthandler = new HttpClientHandler() {
 				Proxy = proxy,
 				UseProxy = true
 			};
 			HttpClient client = new HttpClient(clienthandler) {
-				Timeout = new TimeSpan(0, 0, 10)
+				Timeout = new TimeSpan(0, 0, timeoutSecs)
 			};
 
 			ProxyCheckResult result = ProxyCheckResult.UNKNOWN;
 
 			try {
-				HttpResponseMessage resp = await client.GetAsync("http://google.com");
+				HttpResponseMessage resp = await client.GetAsync(website);
 
 				switch (resp.StatusCode) {
 					case HttpStatusCode.OK:

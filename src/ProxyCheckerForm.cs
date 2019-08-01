@@ -140,7 +140,7 @@ namespace ProxyChecker {
 				Progress<ProxyCheckProgressReport> progress = new Progress<ProxyCheckProgressReport>();
 				progress.ProgressChanged += proxyFileProgress_ProgressChanged;
 
-				await ProxyChecker.CheckProxies(proxies, progress);
+				await ProxyChecker.CheckProxies(proxies, targetWebsite.Text, (int)timeoutThreshold.Value, progress);
 			}
 		}
 	}
