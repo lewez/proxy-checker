@@ -14,7 +14,7 @@ namespace ProxyChecker {
 			Application.Run(new ProxyCheckerForm());
 		}
 
-		public static async Task CheckProxies(List<WebProxy> proxies, string website, int timeoutSecs, IProgress<ProxyCheckProgressReport> progress) {
+		public static async Task CheckProxiesAsync(List<WebProxy> proxies, string website, int timeoutSecs, IProgress<ProxyCheckProgressReport> progress) {
 			int numTotal = proxies.Count;
 			int numChecked = 0;
 			int chunkSize = Math.Min(ChunkSize, proxies.Count);
@@ -24,7 +24,7 @@ namespace ProxyChecker {
 
 				foreach (WebProxy proxy in splitProxies) {
 					tasks.Add(Task.Run(() => {
-						Task<ProxyCheckResult> result = CheckProxy(proxy, website, timeoutSecs);
+						Task<ProxyCheckResult> result = CheckProxyAsync(proxy, website, timeoutSecs);
 
 						progress.Report(new ProxyCheckProgressReport() {
 							NumTotal = numTotal,
@@ -39,11 +39,9 @@ namespace ProxyChecker {
 
 				await Task.WhenAll(tasks);
 			}
-
-			Console.WriteLine("All tasks complete");
 		}
 
-		public static async Task<ProxyCheckResult> CheckProxy(WebProxy proxy, string website, int timeoutSecs) {
+		public static async Task<ProxyCheckResult> CheckProxyAsync(WebProxy proxy, string website, int timeoutSecs) {
 			HttpClientHandler clienthandler = new HttpClientHandler() {
 				Proxy = proxy,
 				UseProxy = true
@@ -51,7 +49,6 @@ namespace ProxyChecker {
 			HttpClient client = new HttpClient(clienthandler) {
 				Timeout = new TimeSpan(0, 0, timeoutSecs)
 			};
-
 			ProxyCheckResult result = ProxyCheckResult.UNKNOWN;
 
 			try {
