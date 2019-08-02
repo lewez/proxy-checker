@@ -33,7 +33,7 @@ namespace ProxyChecker {
 		public ProxyCheckerForm() {
 			this.Width = 600;
 			this.Height = 400;
-			this.Text = "Proxy Checker - https://github.com/lewez";
+			this.Text = "Proxy Checker - github.com/lewez";
 
 			layoutPanel = new TableLayoutPanel();
 			layoutPanel.Dock = DockStyle.Fill;
@@ -59,14 +59,14 @@ namespace ProxyChecker {
 			timeoutLayoutPanel = new TableLayoutPanel();
 			timeoutLayoutPanel.Dock = DockStyle.Fill;
 			timeoutLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-			timeoutLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 30));
-			timeoutLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 70));
+			timeoutLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 35));
+			timeoutLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 65));
 
 			targetWebsiteLayoutPanel = new TableLayoutPanel();
 			targetWebsiteLayoutPanel.Dock = DockStyle.Fill;
 			targetWebsiteLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-			targetWebsiteLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 30));
-			targetWebsiteLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 70));
+			targetWebsiteLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 35));
+			targetWebsiteLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 65));
 
 			proxyFileDialog = new OpenFileDialog();
 			proxyFileDialog.Title = "Select proxy list";
@@ -125,7 +125,7 @@ namespace ProxyChecker {
 
 			targetWebsiteLabel = new Label();
 			targetWebsiteLabel.AutoSize = true;
-			targetWebsiteLabel.Text = "Website";
+			targetWebsiteLabel.Text = "Testing Website";
 
 			cancelProxyCheck = new Button();
 			cancelProxyCheck.Dock = DockStyle.Fill;
