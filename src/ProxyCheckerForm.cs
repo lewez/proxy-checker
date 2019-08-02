@@ -150,12 +150,12 @@ namespace ProxyChecker {
 		}
 
 		private async void proxyFileDialog_FileOk(object sender, CancelEventArgs e) {
-			Console.WriteLine("Proxy list selected");
-
 			Stream filestream = proxyFileDialog.OpenFile();
 
 			using (StreamReader reader = new StreamReader(filestream)) {
 				List<WebProxy> proxies = ProxyListParser.ToWebProxy(reader.ReadToEnd());
+
+				Console.WriteLine("Proxy list selected ({0}) proxies", proxies.Count);
 
 				Progress<ProxyCheckProgressReport> progress = new Progress<ProxyCheckProgressReport>();
 				progress.ProgressChanged += proxyFileProgress_ProgressChanged;

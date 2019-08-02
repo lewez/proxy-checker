@@ -9,7 +9,7 @@ namespace ProxyChecker {
 		public static List<WebProxy> ToWebProxy(string proxies) {
 			List<WebProxy> webproxies = new List<WebProxy>();
 
-			foreach (string proxy in proxies.Split('\n')) {
+			foreach (string proxy in new HashSet<string>(proxies.Split('\n'))) {
 				string formattedProxy = proxy.Trim();
 
 				if (String.IsNullOrEmpty(formattedProxy)) {
