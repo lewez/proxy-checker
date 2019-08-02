@@ -11,7 +11,10 @@ namespace ProxyChecker {
 	public class ProxyChecker {
 		private const int ChunkSize = 50;
 
+		[STAThread]
 		public static void Main() {
+			Application.EnableVisualStyles();
+			Application.SetCompatibleTextRenderingDefault(false);
 			Application.Run(new ProxyCheckerForm());
 		}
 
