@@ -6,7 +6,7 @@ namespace ProxyChecker {
 	public class ProxyListParser {
 		// TODO: Remove duplicate proxies
 
-		public static List<WebProxy> Parse(string proxies) {
+		public static List<WebProxy> ToWebProxy(string proxies) {
 			List<WebProxy> webproxies = new List<WebProxy>();
 
 			foreach (string proxy in proxies.Split('\n')) {
@@ -25,6 +25,16 @@ namespace ProxyChecker {
 			}
 
 			return webproxies;
+		}
+
+		public static string ToProxyList(List<WebProxy> proxies) {
+			string str = "";
+
+			foreach (WebProxy proxy in proxies) {
+				str += proxy.Address + "\n";
+			}
+
+			return str;
 		}
 	}
 }

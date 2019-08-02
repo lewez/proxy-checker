@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Linq;
 
 namespace ProxyChecker {
 	public class ProxyCheckerForm : Form {
@@ -18,6 +19,7 @@ namespace ProxyChecker {
 		private ProgressBar proxyFileProgress;
 		private ListView proxyCheckedList;
 		private Button exportWorkingProxies;
+		private SaveFileDialog exportWorkingProxiesSaveDialog;
 		private NumericUpDown timeoutThreshold;
 		private TextBox targetWebsite;
 		private Button cancelProxyCheck;
@@ -81,6 +83,12 @@ namespace ProxyChecker {
 			exportWorkingProxies.Text = "Export working proxies";
 			exportWorkingProxies.AutoSize = true;
 			exportWorkingProxies.Top = 300;
+			exportWorkingProxies.Click += exportWorkingProxies_Click;
+
+			exportWorkingProxiesSaveDialog = new SaveFileDialog();
+			exportWorkingProxiesSaveDialog.Title = "Export working proxies";
+			exportWorkingProxiesSaveDialog.DefaultExt = "txt";
+			exportWorkingProxiesSaveDialog.FileName = "exported_proxies";
 
 			// Disable control while proxy check is underway
 			timeoutThreshold = new NumericUpDown();
@@ -147,7 +155,7 @@ namespace ProxyChecker {
 			Stream filestream = proxyFileDialog.OpenFile();
 
 			using (StreamReader reader = new StreamReader(filestream)) {
-				List<WebProxy> proxies = ProxyListParser.Parse(reader.ReadToEnd());
+				List<WebProxy> proxies = ProxyListParser.ToWebProxy(reader.ReadToEnd());
 
 				Progress<ProxyCheckProgressReport> progress = new Progress<ProxyCheckProgressReport>();
 				progress.ProgressChanged += proxyFileProgress_ProgressChanged;
@@ -166,6 +174,24 @@ namespace ProxyChecker {
 		private void cancelProxyCheck_Click(object sender, EventArgs e) {
 			cancellationToken.Cancel();
 			changeRunningState(ProxyCheckerState.Cancelled);
+		}
+
+		private void exportWorkingProxies_Click(object sender, EventArgs e) {
+			if (exportWorkingProxiesSaveDialog.ShowDialog() == DialogResult.OK) {
+				Stream filestream;
+
+				if ((filestream = exportWorkingProxiesSaveDialog.OpenFile()) != null) {
+					using (StreamWriter writer = new StreamWriter(filestream)) {
+						List<WebProxy> workingProxies = new List<WebProxy>(proxiesChecked.Where(
+							kv => kv.Value == ProxyCheckResult.OK
+						).ToDictionary(x => x.Key, x => x.Value).Keys);
+
+						writer.Write(ProxyListParser.ToProxyList(workingProxies));
+					}
+
+					filestream.Close();
+				}
+			}
 		}
 
 		private void changeRunningState(ProxyCheckerState state) {
