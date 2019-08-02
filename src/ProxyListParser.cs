@@ -4,8 +4,6 @@ using System.Collections.Generic;
 
 namespace ProxyChecker {
 	public class ProxyListParser {
-		// TODO: Remove duplicate proxies
-
 		public static List<WebProxy> ToWebProxy(string proxies) {
 			List<WebProxy> webproxies = new List<WebProxy>();
 

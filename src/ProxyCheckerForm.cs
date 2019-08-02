@@ -56,7 +56,6 @@ namespace ProxyChecker {
 			proxyFileDialog.DefaultExt = "txt";
 			proxyFileDialog.FileOk += proxyFileDialog_FileOk;
 
-			// Disable control while proxy check is underway
 			openProxyFileDialog = new Button();
 			openProxyFileDialog.Dock = DockStyle.Fill;
 			openProxyFileDialog.Text = "Open proxy list";
@@ -77,7 +76,6 @@ namespace ProxyChecker {
 			proxyCheckedList.FullRowSelect = true;
 			proxyCheckedList.GridLines = true;
 
-			// Disable control until proxy check is complete
 			exportWorkingProxies = new Button();
 			exportWorkingProxies.Dock = DockStyle.Fill;
 			exportWorkingProxies.Text = "Export working proxies";
@@ -90,7 +88,6 @@ namespace ProxyChecker {
 			exportWorkingProxiesSaveDialog.DefaultExt = "txt";
 			exportWorkingProxiesSaveDialog.FileName = "exported_proxies";
 
-			// Disable control while proxy check is underway
 			timeoutThreshold = new NumericUpDown();
 			timeoutThreshold.Dock = DockStyle.Fill;
 			timeoutThreshold.Minimum = 1;
@@ -98,7 +95,6 @@ namespace ProxyChecker {
 			timeoutThreshold.Value = 10;
 			timeoutThreshold.Left = 500;
 
-			// Disable control while proxy check is underway
 			targetWebsite = new TextBox();
 			targetWebsite.Dock = DockStyle.Fill;
 			targetWebsite.Text = "http://google.com";
@@ -106,7 +102,6 @@ namespace ProxyChecker {
 			targetWebsite.Top = 24;
 			targetWebsite.Width = timeoutThreshold.Width;
 
-			// Disable control until proxy check is underway
 			cancelProxyCheck = new Button();
 			cancelProxyCheck.Dock = DockStyle.Fill;
 			cancelProxyCheck.Text = "Cancel";
@@ -155,7 +150,7 @@ namespace ProxyChecker {
 			using (StreamReader reader = new StreamReader(filestream)) {
 				List<WebProxy> proxies = ProxyListParser.ToWebProxy(reader.ReadToEnd());
 
-				Console.WriteLine("Proxy list selected ({0}) proxies", proxies.Count);
+				Console.WriteLine("Proxy list selected. ({0}) proxies", proxies.Count);
 
 				Progress<ProxyCheckProgressReport> progress = new Progress<ProxyCheckProgressReport>();
 				progress.ProgressChanged += proxyFileProgress_ProgressChanged;
