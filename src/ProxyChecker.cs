@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace ProxyChecker {
 	public class ProxyChecker {
-		private const int ChunkSize = 25;
+		private const int ChunkSize = 50;
 
 		public static void Main() {
 			Application.Run(new ProxyCheckerForm());
