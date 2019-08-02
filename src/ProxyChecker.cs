@@ -17,7 +17,6 @@ namespace ProxyChecker {
 
 		public static async Task CheckProxiesAsync(List<WebProxy> proxies, string website, int timeoutSecs, IProgress<ProxyCheckProgressReport> progress, CancellationToken cancellationToken) {
 			int numTotal = proxies.Count;
-			int numChecked = 0;
 			int chunkSize = Math.Min(ChunkSize, proxies.Count);
 
 			foreach (List<WebProxy> splitProxies in ListExtensions.ChunkBy(proxies, chunkSize)) {
@@ -33,7 +32,6 @@ namespace ProxyChecker {
 
 						progress.Report(new ProxyCheckProgressReport() {
 							NumTotal = numTotal,
-							NumChecked = ++numChecked,
 							ProxyChecked = proxy,
 							ProxyCheckResult = result.Result
 						});

@@ -22,6 +22,7 @@ namespace ProxyChecker {
 		private TextBox targetWebsite;
 		private Button cancelProxyCheck;
 		private CancellationTokenSource cancellationToken;
+		private Dictionary<WebProxy, ProxyCheckResult> proxiesChecked;
 
 		public ProxyCheckerForm() {
 			this.Width = 600;
@@ -115,6 +116,8 @@ namespace ProxyChecker {
 			controlLayoutPanel.Controls.Add(targetWebsite, 0, 4);
 
 			Controls.Add(layoutPanel);
+
+			changeRunningState(ProxyCheckerState.Initial);
 		}
 
 		private void openProxyFileDialog_Click(object sender, EventArgs e) {
@@ -126,7 +129,9 @@ namespace ProxyChecker {
 				return;
 			}
 
-			proxyFileProgress.Value = (progreport.NumChecked * 100) / progreport.NumTotal;
+			proxiesChecked.Add(progreport.ProxyChecked, progreport.ProxyCheckResult);
+
+			proxyFileProgress.Value = (proxiesChecked.Count * 100) / progreport.NumTotal;
 
 			ListViewItem proxyRow = new ListViewItem();
 			proxyRow.SubItems.Add(progreport.ProxyChecked.Address.ToString());
@@ -149,33 +154,55 @@ namespace ProxyChecker {
 
 				cancellationToken = new CancellationTokenSource();
 
-				changeRunningState(true);
-				proxyCheckedList.Items.Clear();
+				changeRunningState(ProxyCheckerState.Running);
+				proxiesChecked = new Dictionary<WebProxy, ProxyCheckResult>();
 
 				await ProxyChecker.CheckProxiesAsync(proxies, targetWebsite.Text, (int)timeoutThreshold.Value, progress, cancellationToken.Token);
+
+				changeRunningState(ProxyCheckerState.Finished);
 			}
 		}
 
 		private void cancelProxyCheck_Click(object sender, EventArgs e) {
 			cancellationToken.Cancel();
-			changeRunningState(false);
+			changeRunningState(ProxyCheckerState.Cancelled);
 		}
 
-		private void changeRunningState(bool isRunning) {
-			if (isRunning) {
-				cancelProxyCheck.Enabled = true;
-				openProxyFileDialog.Enabled = false;
-				exportWorkingProxies.Enabled = false;
-				timeoutThreshold.Enabled = false;
-				targetWebsite.Enabled = false;
-			}
-			else {
-				cancelProxyCheck.Enabled = false;
-				openProxyFileDialog.Enabled = true;
-				exportWorkingProxies.Enabled = true;
-				timeoutThreshold.Enabled = true;
-				targetWebsite.Enabled = true;
-				proxyFileProgress.Value = 0;
+		private void changeRunningState(ProxyCheckerState state) {
+			switch (state) {
+				case ProxyCheckerState.Initial:
+					cancelProxyCheck.Enabled = false;
+					openProxyFileDialog.Enabled = true;
+					exportWorkingProxies.Enabled = false;
+					timeoutThreshold.Enabled = true;
+					targetWebsite.Enabled = true;
+					proxyFileProgress.Value = 0;
+					break;
+				case ProxyCheckerState.Running:
+					proxyCheckedList.Items.Clear();
+					cancelProxyCheck.Enabled = true;
+					openProxyFileDialog.Enabled = false;
+					exportWorkingProxies.Enabled = false;
+					timeoutThreshold.Enabled = false;
+					targetWebsite.Enabled = false;
+					proxyFileProgress.Value = 0;
+					break;
+				case ProxyCheckerState.Cancelled:
+					cancelProxyCheck.Enabled = false;
+					openProxyFileDialog.Enabled = true;
+					exportWorkingProxies.Enabled = true;
+					timeoutThreshold.Enabled = true;
+					targetWebsite.Enabled = true;
+					proxyFileProgress.Value = 0;
+					break;
+				case ProxyCheckerState.Finished:
+					cancelProxyCheck.Enabled = false;
+					openProxyFileDialog.Enabled = true;
+					exportWorkingProxies.Enabled = true;
+					timeoutThreshold.Enabled = true;
+					targetWebsite.Enabled = true;
+					proxyFileProgress.Value = 100;
+					break;
 			}
 		}
 	}
