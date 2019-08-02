@@ -1,5 +1,5 @@
 # Proxy Checker
-![GUI](https://i.imgur.com/GBxOcVf.png)
+![GUI](https://i.imgur.com/bxms27h.png)
 ### Importing proxies
 The proxy file must be formatted similarly as the list shown below. (ip:port) then newline.
 ```
