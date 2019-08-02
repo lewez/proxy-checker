@@ -14,13 +14,17 @@ namespace ProxyChecker {
 		private TableLayoutPanel layoutPanel;
 		private TableLayoutPanel listViewLayoutPanel;
 		private TableLayoutPanel controlLayoutPanel;
+		private TableLayoutPanel timeoutLayoutPanel;
+		private TableLayoutPanel targetWebsiteLayoutPanel;
 		private OpenFileDialog proxyFileDialog;
 		private Button openProxyFileDialog;
 		private ProgressBar proxyFileProgress;
 		private ListView proxyCheckedList;
 		private Button exportWorkingProxies;
 		private SaveFileDialog exportWorkingProxiesSaveDialog;
+		private Label timeoutLabel;
 		private NumericUpDown timeoutThreshold;
+		private Label targetWebsiteLabel;
 		private TextBox targetWebsite;
 		private Button cancelProxyCheck;
 		private CancellationTokenSource cancellationToken;
@@ -29,6 +33,7 @@ namespace ProxyChecker {
 		public ProxyCheckerForm() {
 			this.Width = 600;
 			this.Height = 400;
+			this.Text = "Proxy Checker - https://github.com/lewez";
 
 			layoutPanel = new TableLayoutPanel();
 			layoutPanel.Dock = DockStyle.Fill;
@@ -45,11 +50,23 @@ namespace ProxyChecker {
 			controlLayoutPanel = new TableLayoutPanel();
 			controlLayoutPanel.Dock = DockStyle.Fill;
 			controlLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-			controlLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 20));
-			controlLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 20));
-			controlLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 20));
-			controlLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 20));
-			controlLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 20));
+			controlLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 24));
+			controlLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 24));
+			controlLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 24));
+			controlLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 14));
+			controlLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 14));
+
+			timeoutLayoutPanel = new TableLayoutPanel();
+			timeoutLayoutPanel.Dock = DockStyle.Fill;
+			timeoutLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+			timeoutLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 30));
+			timeoutLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 70));
+
+			targetWebsiteLayoutPanel = new TableLayoutPanel();
+			targetWebsiteLayoutPanel.Dock = DockStyle.Fill;
+			targetWebsiteLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+			targetWebsiteLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 30));
+			targetWebsiteLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 70));
 
 			proxyFileDialog = new OpenFileDialog();
 			proxyFileDialog.Title = "Select proxy list";
@@ -95,12 +112,20 @@ namespace ProxyChecker {
 			timeoutThreshold.Value = 10;
 			timeoutThreshold.Left = 500;
 
+			timeoutLabel = new Label();
+			timeoutLabel.AutoSize = true;
+			timeoutLabel.Text = "Timeout (secs)";
+
 			targetWebsite = new TextBox();
 			targetWebsite.Dock = DockStyle.Fill;
 			targetWebsite.Text = "http://google.com";
 			targetWebsite.Left = 500;
 			targetWebsite.Top = 24;
 			targetWebsite.Width = timeoutThreshold.Width;
+
+			targetWebsiteLabel = new Label();
+			targetWebsiteLabel.AutoSize = true;
+			targetWebsiteLabel.Text = "Website";
 
 			cancelProxyCheck = new Button();
 			cancelProxyCheck.Dock = DockStyle.Fill;
@@ -112,11 +137,15 @@ namespace ProxyChecker {
 			layoutPanel.Controls.Add(proxyFileProgress, 0, 1);
 			listViewLayoutPanel.Controls.Add(proxyCheckedList, 0, 0);
 			listViewLayoutPanel.Controls.Add(controlLayoutPanel, 1, 0);
+			timeoutLayoutPanel.Controls.Add(timeoutLabel, 0, 0);
+			timeoutLayoutPanel.Controls.Add(timeoutThreshold, 0, 1);
+			targetWebsiteLayoutPanel.Controls.Add(targetWebsiteLabel, 0, 0);
+			targetWebsiteLayoutPanel.Controls.Add(targetWebsite, 0, 1);
 			controlLayoutPanel.Controls.Add(openProxyFileDialog, 0, 0);
 			controlLayoutPanel.Controls.Add(cancelProxyCheck, 0, 1);
 			controlLayoutPanel.Controls.Add(exportWorkingProxies, 0, 2);
-			controlLayoutPanel.Controls.Add(timeoutThreshold, 0, 3);
-			controlLayoutPanel.Controls.Add(targetWebsite, 0, 4);
+			controlLayoutPanel.Controls.Add(timeoutLayoutPanel, 0, 3);
+			controlLayoutPanel.Controls.Add(targetWebsiteLayoutPanel, 0, 4);
 
 			Controls.Add(layoutPanel);
 
