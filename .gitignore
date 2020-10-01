@@ -1,3 +1,4 @@
 application.exe
 .vscode/
 example_proxies.txt
+compile.sh

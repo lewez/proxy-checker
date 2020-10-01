@@ -33,7 +33,7 @@ namespace ProxyChecker {
 		public ProxyCheckerForm() {
 			this.Width = 600;
 			this.Height = 400;
-			this.Text = "Proxy Checker - github.com/lewez";
+			this.Text = "Proxy Checker";
 
 			layoutPanel = new TableLayoutPanel();
 			layoutPanel.Dock = DockStyle.Fill;

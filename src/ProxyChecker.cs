@@ -18,7 +18,13 @@ namespace ProxyChecker {
 			Application.Run(new ProxyCheckerForm());
 		}
 
-		public static async Task CheckProxiesAsync(List<WebProxy> proxies, string website, int timeoutSecs, IProgress<ProxyCheckProgressReport> progress, CancellationToken cancellationToken) {
+		public static async Task CheckProxiesAsync(
+				List<WebProxy> proxies,
+				string website,
+				int timeoutSecs,
+				IProgress<ProxyCheckProgressReport> progress,
+				CancellationToken cancellationToken)
+		{
 			int numTotal = proxies.Count;
 			int chunkSize = Math.Min(ChunkSize, proxies.Count);
 
@@ -27,19 +33,17 @@ namespace ProxyChecker {
 					break;
 				}
 
-				List<Task<ProxyCheckResult>> tasks = new List<Task<ProxyCheckResult>>();
+				List<Task> tasks = new List<Task>();
 
 				foreach (WebProxy proxy in splitProxies) {
-					tasks.Add(Task.Run(() => {
-						Task<ProxyCheckResult> result = CheckProxyAsync(proxy, website, timeoutSecs);
+					tasks.Add(Task.Run(async () => {
+						ProxyCheckResult result = await CheckProxyAsync(proxy, website, timeoutSecs);
 
 						progress.Report(new ProxyCheckProgressReport() {
 							NumTotal = numTotal,
 							ProxyChecked = proxy,
-							ProxyCheckResult = result.Result
+							ProxyCheckResult = result
 						});
-
-						return result;
 					}));
 				}
 
@@ -47,38 +51,38 @@ namespace ProxyChecker {
 			}
 		}
 
-		public static async Task<ProxyCheckResult> CheckProxyAsync(WebProxy proxy, string website, int timeoutSecs) {
-			HttpClientHandler clienthandler = new HttpClientHandler() {
-				Proxy = proxy,
-				UseProxy = true
-			};
-			HttpClient client = new HttpClient(clienthandler) {
-				Timeout = new TimeSpan(0, 0, timeoutSecs)
-			};
-			ProxyCheckResult result = ProxyCheckResult.UNKNOWN;
+		public static async Task<ProxyCheckResult> CheckProxyAsync(
+				WebProxy proxy,
+				string website,
+				int timeoutSecs)
+		{
+			using (HttpClientHandler clienthandler = new HttpClientHandler() {
+					Proxy = proxy, UseProxy = true}) {
+				using (HttpClient httpClient = new HttpClient(clienthandler) {
+						Timeout = new TimeSpan(0, 0, timeoutSecs)}) {
+					ProxyCheckResult result = ProxyCheckResult.UNKNOWN;
 
-			try {
-				HttpResponseMessage resp = await client.GetAsync(website);
+					try {
+						HttpResponseMessage resp = await httpClient.GetAsync(website);
 
-				switch (resp.StatusCode) {
-					case HttpStatusCode.OK:
-						result = ProxyCheckResult.OK;
-						break;
-					default:
-						result = ProxyCheckResult.UNKNOWN;
-						break;
+						switch (resp.StatusCode) {
+							case HttpStatusCode.OK:
+								result = ProxyCheckResult.OK;
+								break;
+							default:
+								result = ProxyCheckResult.UNKNOWN;
+								break;
+						}
+					}
+					catch (Exception ex) {
+						if (ex is TaskCanceledException || ex is HttpRequestException) {
+							result = ProxyCheckResult.TIMED_OUT;
+						}
+					}
+
+					return result;
 				}
 			}
-			catch (Exception ex) {
-				if (ex is TaskCanceledException || ex is HttpRequestException) {
-					result = ProxyCheckResult.TIMED_OUT;
-				}
-			}
-
-			clienthandler.Dispose();
-			client.Dispose();
-
-			return result;
 		}
 	}
 }
