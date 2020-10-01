@@ -46,37 +46,31 @@ namespace ProxyChecker {
 		}
 
 		public static async Task<ProxyCheckResult> CheckProxyAsync(WebProxy proxy, string website, int timeoutSecs) {
-			HttpClientHandler clienthandler = new HttpClientHandler() {
-				Proxy = proxy,
-				UseProxy = true
-			};
-			HttpClient client = new HttpClient(clienthandler) {
-				Timeout = new TimeSpan(0, 0, timeoutSecs)
-			};
-			ProxyCheckResult result = ProxyCheckResult.UNKNOWN;
+			using (HttpClientHandler clienthandler = new HttpClientHandler() {Proxy = proxy, UseProxy = true}) {
+				using (HttpClient httpClient = new HttpClient(clienthandler) {Timeout = new TimeSpan(0, 0, timeoutSecs)}) {
+					ProxyCheckResult result = ProxyCheckResult.UNKNOWN;
 
-			try {
-				HttpResponseMessage resp = await client.GetAsync(website);
+					try {
+						HttpResponseMessage resp = await httpClient.GetAsync(website);
 
-				switch (resp.StatusCode) {
-					case HttpStatusCode.OK:
-						result = ProxyCheckResult.OK;
-						break;
-					default:
-						result = ProxyCheckResult.UNKNOWN;
-						break;
+						switch (resp.StatusCode) {
+							case HttpStatusCode.OK:
+								result = ProxyCheckResult.OK;
+								break;
+							default:
+								result = ProxyCheckResult.UNKNOWN;
+								break;
+						}
+					}
+					catch (Exception ex) {
+						if (ex is TaskCanceledException || ex is HttpRequestException) {
+							result = ProxyCheckResult.TIMED_OUT;
+						}
+					}
+
+					return result;
 				}
 			}
-			catch (Exception ex) {
-				if (ex is TaskCanceledException || ex is HttpRequestException) {
-					result = ProxyCheckResult.TIMED_OUT;
-				}
-			}
-
-			clienthandler.Dispose();
-			client.Dispose();
-
-			return result;
 		}
 	}
 }
