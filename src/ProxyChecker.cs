@@ -27,19 +27,17 @@ namespace ProxyChecker {
 					break;
 				}
 
-				List<Task<ProxyCheckResult>> tasks = new List<Task<ProxyCheckResult>>();
+				List<Task> tasks = new List<Task>();
 
 				foreach (WebProxy proxy in splitProxies) {
-					tasks.Add(Task.Run(() => {
-						Task<ProxyCheckResult> result = CheckProxyAsync(proxy, website, timeoutSecs);
+					tasks.Add(Task.Run(async () => {
+						ProxyCheckResult result = await CheckProxyAsync(proxy, website, timeoutSecs);
 
 						progress.Report(new ProxyCheckProgressReport() {
 							NumTotal = numTotal,
 							ProxyChecked = proxy,
-							ProxyCheckResult = result.Result
+							ProxyCheckResult = result
 						});
-
-						return result;
 					}));
 				}
 
